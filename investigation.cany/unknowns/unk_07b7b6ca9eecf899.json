@@ -1,0 +1,14 @@
+{
+  "id": "unk_07b7b6ca9eecf899",
+  "revision": 2,
+  "question": "Does the menu-bar icon reliably bring the window back after it was closed (minimised) and do 'Neuer Eintrag'/'Beenden' work from it?",
+  "severity": "medium",
+  "domain": "system-integration",
+  "status": "resolved",
+  "probes": [
+    "Person starts the app normally, closes the window, uses the menu-bar icon"
+  ],
+  "evidence_for": [],
+  "evidence_against": [],
+  "resolution": "Confirmed by the person (2026-11-23): the menu-bar icon appears and reliably brings the window back."
+}

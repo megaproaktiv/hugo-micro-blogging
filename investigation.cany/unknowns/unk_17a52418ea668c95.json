@@ -1,0 +1,14 @@
+{
+  "id": "unk_17a52418ea668c95",
+  "revision": 2,
+  "question": "Does the generated macOS Quick Action ('Als Microblog-Snippet speichern') appear in the right-click Services menu and pass selected text to the app?",
+  "severity": "medium",
+  "domain": "system-integration",
+  "status": "resolved",
+  "probes": [
+    "Person clicks 'Rechtsklick-Dienst einrichten' in Einstellungen, selects text in Safari, right-click → Dienste"
+  ],
+  "evidence_for": [],
+  "evidence_against": [],
+  "resolution": "Confirmed by the person (2026-11-23): the Quick Action appears in the right-click menu. Read-only check of ~/Library/Services showed the new 'Als hmb-Snippet speichern' entry points at target/debug/hmb; a stale pre-rename entry 'Als Microblog-Snippet speichern' (pointing at the removed microblog binary) still exists — the app now shows it in Einstellungen and removes it on 'Neu einrichten'."
+}

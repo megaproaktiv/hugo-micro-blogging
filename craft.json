@@ -1,0 +1,229 @@
+{
+  "version": 5,
+  "name": "hugo-micro-blogging",
+  "request": "Ich will eine App für Microblogging, und damit kann ich Markdown-Artikel schreiben. Diese werden lokal in einem Verzeichnis behandelt, das heißt „Content“, und haben jeweils Jahr, Monat, Tag plus eine ID für den aktuellen Microblog. \n\nDas Ganze soll in Stufe 2 synchronisiert werden mit einer Go-Hugo-Webseite.\n- Ich kann über ein Kontextmenü auf dem Rechner kleine Snippets einfügen.\n- Ich kann Markdown editieren, mit Preview.\n- Es gibt Markdown-Frontmatter, mit der ich auch Tags und das Datum der Erstellung bearbeiten kann.\n- Es gibt den Abstract und dann den Artikel selber, wo die Basis-Markdown-Sachen da sind.\n\nDie Ansicht ist ein Scrollfeld mit 10 Einträgen, und gleichzeitig kann ich nach den Tags suchen, die frei vergebbar sind. Später kann ich die Ontologie der Tags untereinander auch noch bearbeiten.\n\nIch habe also so etwas wie eine App oben, in der Zeile, in der ich das Programm immer aufrufen kann. Auf der linken Seite sehe ich die Haupttags. Ich kann oben nach Tags suchen, und dann habe ich einfach eine scrollbare Liste, in der ich hiermit die Überschrift und den Abstract sehe, der auch nur 3 Zeilen lang sein darf. \n\nAuf Knopfdruck synchronisiert sich das mit einem GitHub-Repository. Das heißt, es holt neue Daten aus dem Repository und schreibt die Daten, die ich selber habe und lokal behandelt sind, rein.\n\nUm zu schauen, was neu ist, gibt es Transaktionsdateien, die JSON sind. Da ist jeweils ein Eintrag pro Tag, der angibt, was geändert wurde. Das heißt: die ID des Artikels, die immer aus Jahr, Monat, Tag, Verzeichnisname und dem Kurznamen des Verzeichnisnamens besteht, damit dann später über verschiedene Clients auch eine Synchronisierung gemacht werden kann.",
+  "target": {
+    "kind": "none"
+  },
+  "stack": "Rust + egui (eframe)",
+  "status": "ready",
+  "note": "Ready: all 2 checks pass.",
+  "created_ms": 1795385278285,
+  "updated_ms": 1795390480139,
+  "checks": [
+    {
+      "round": 1,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795386798470
+    },
+    {
+      "round": 1,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795386801987
+    },
+    {
+      "round": 2,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795387934501
+    },
+    {
+      "round": 2,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795387937845
+    },
+    {
+      "round": 3,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795388569772
+    },
+    {
+      "round": 3,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795388573081
+    },
+    {
+      "round": 4,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795389037660
+    },
+    {
+      "round": 4,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-4/screenshot.png"
+      ],
+      "at_ms": 1795389041365
+    },
+    {
+      "round": 5,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795389472990
+    },
+    {
+      "round": 5,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795389476503
+    },
+    {
+      "round": 6,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795389715230
+    },
+    {
+      "round": 6,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795389718829
+    },
+    {
+      "round": 7,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795390125656
+    },
+    {
+      "round": 7,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795390129178
+    },
+    {
+      "round": 8,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795390239760
+    },
+    {
+      "round": 8,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795390243307
+    },
+    {
+      "round": 9,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795390316634
+    },
+    {
+      "round": 9,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795390320124
+    },
+    {
+      "round": 10,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795390467207
+    },
+    {
+      "round": 10,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795390470690
+    }
+  ],
+  "agent_session": "57b8a487-cacd-44a2-b649-02274356afe3",
+  "agent_session_by": "claude-code",
+  "agent_session_deep": false,
+  "capture_deep": false,
+  "allowed_actions": [],
+  "last_reply": "The open question was technical and badly worded on my part. In plain terms it was: \"How should the articles get into the Hugo website?\" Your earlier answers already settle it: the app copies the articles into the blog's content folder, and Git and Hugo take care of the rest. I'll close the question and have the app show in the settings when the sync folder belongs to a Hugo website.The question was badly worded on my part. In plain terms it was: \"How do the articles get into your Hugo website?\" Your earlier answers already settled it: the app copies the articles into the blog's content folder, and Git and Hugo take care of the rest, so I've closed the question.\n\nIn the settings, the app now also shows under the sync folder whether that folder belongs to a Hugo website, by looking for its hugo.toml one level up. It reports either \"Gehört zur Hugo-Seite …\" or a hint that no Hugo website was found. Build, tests and check pass, and there are no open questions left.",
+  "asset_budget_usd": 5.0,
+  "generate_assets": false,
+  "questions": "decide",
+  "approvals": {
+    "delete_outside": "allow",
+    "system": "ask",
+    "other_tools": "ask"
+  }
+}

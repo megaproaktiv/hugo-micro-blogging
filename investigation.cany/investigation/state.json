@@ -1,0 +1,47 @@
+{
+  "revision": 14,
+  "brief": {
+    "question": "Build a desktop microblogging app (Rust/egui) that writes Markdown articles with frontmatter (title, date, tags, abstract) into Content/YYYY/MM/DD/<id>/, shows a tag sidebar, tag search and a scrollable list (title + 3-line abstract), Markdown editing with preview, snippets, JSON transaction logs per day, and button-triggered GitHub sync (pull + push), Hugo-compatible as stage 2.",
+    "purpose": "Personal microblogging tool for a non-coder, later synced with a Hugo website.",
+    "targets": [
+      "none - build from request"
+    ],
+    "constraints": [
+      "Rust + eframe/egui, cargo project in app/",
+      "Change files only in app/",
+      "--screenshot option required"
+    ],
+    "done_when": "cargo build succeeds, screenshot shows the main view with sidebar tags, search, list and editor/preview; sync and transaction files work."
+  },
+  "plan": [
+    {
+      "title": "Plan the layout: top bar, tags on the left, list of entries, editor with preview",
+      "status": "done"
+    },
+    {
+      "title": "Save articles as Markdown with date, tags and abstract in the Content folder",
+      "status": "done"
+    },
+    {
+      "title": "Add tag search, the 10-entry list and the tag tree",
+      "status": "done"
+    },
+    {
+      "title": "Add snippets, the menu-bar icon and the right-click entry",
+      "status": "done"
+    },
+    {
+      "title": "Add daily change logs and GitHub syncing",
+      "status": "done"
+    },
+    {
+      "title": "Build, take a picture of the app and check it",
+      "status": "done",
+      "why": "rebuild_check: build passed, screenshot passed"
+    }
+  ],
+  "hypotheses": [],
+  "findings": [],
+  "handoff": "Round 10: Person didn't understand the stage-2 question; explained it and resolved the unknown (stage 2 = sync into the Hugo content folder; Git/Hugo build handled by the person). Added store::hugo_site_of(content) (looks for hugo.toml/yaml/json or config.* one level up) and a line in Einstellungen under Sync-Ordner showing the detected Hugo site. Build, 9 tests, screenshot, rebuild_check pass. No open unknowns left.",
+  "updated": "2026-11-22T23:34:35Z"
+}

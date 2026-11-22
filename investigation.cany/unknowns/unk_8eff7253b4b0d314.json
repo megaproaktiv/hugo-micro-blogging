@@ -1,0 +1,14 @@
+{
+  "id": "unk_8eff7253b4b0d314",
+  "revision": 2,
+  "question": "Stage 2: how should the Hugo website consume the content (same repo with a Hugo theme, or a separate site repo pulling content/)?",
+  "severity": "low",
+  "domain": "scope",
+  "status": "resolved",
+  "probes": [
+    "Ask the person which Hugo site/theme and repo layout they use"
+  ],
+  "evidence_for": [],
+  "evidence_against": [],
+  "resolution": "Settled by the person's earlier answers: stage 2 = local folder sync. The app writes Hugo page bundles into the blog's content folder (sync folder, e.g. ~/letsanders/nachgedanken/data/content with hugo.toml one level up); Git and the Hugo build are handled by the person outside the app ('Durch Git ist das ja alles abgedeckt'). Settings now show when the sync folder belongs to a Hugo site."
+}
