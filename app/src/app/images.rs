@@ -49,13 +49,69 @@ impl HmbApp {
     }
 
     pub(super) fn pick_images(&mut self, ctx: &egui::Context) {
-        let files = rfd::FileDialog::new()
-            .set_title("Bild hinzufügen")
-            .add_filter("Bilder", &store::IMAGE_EXT)
-            .pick_files()
-            .unwrap_or_default();
-        if !files.is_empty() {
-            self.add_images(ctx, &files);
+        self.start_pick(ctx, PickKind::Images, None);
+    }
+
+    /// Opens a native dialog without blocking the winit event handler. A modal run inside
+    /// the handler lets winit re-enter it (e.g. during a drag in the panel) and abort.
+    pub(super) fn start_pick(&mut self, ctx: &egui::Context, kind: PickKind, dir: Option<PathBuf>) {
+        if self.pending_pick.is_some() {
+            return;
+        }
+        let (tx, rx) = std::sync::mpsc::channel();
+        let ctx2 = ctx.clone();
+        std::thread::spawn(move || {
+            let mut dlg = rfd::AsyncFileDialog::new();
+            if let Some(d) = dir.filter(|d| d.is_dir()) {
+                dlg = dlg.set_directory(d);
+            }
+            let res: Vec<PathBuf> = pollster::block_on(async {
+                match kind {
+                    PickKind::Images => dlg
+                        .set_title("Bild hinzufügen")
+                        .add_filter("Bilder", &store::IMAGE_EXT)
+                        .pick_files()
+                        .await
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|f| f.path().to_path_buf())
+                        .collect(),
+                    PickKind::DataDir | PickKind::SyncDir => {
+                        dlg.pick_folder().await.map(|f| vec![f.path().to_path_buf()]).unwrap_or_default()
+                    }
+                }
+            });
+            let _ = tx.send(res);
+            ctx2.request_repaint();
+        });
+        self.pending_pick = Some((kind, rx));
+    }
+
+    pub(super) fn poll_pick(&mut self, ctx: &egui::Context) {
+        let Some((kind, rx)) = &self.pending_pick else { return };
+        let kind = *kind;
+        let files = match rx.try_recv() {
+            Ok(f) => f,
+            Err(std::sync::mpsc::TryRecvError::Empty) => return,
+            Err(_) => vec![],
+        };
+        self.pending_pick = None;
+        match kind {
+            PickKind::Images => {
+                if !files.is_empty() {
+                    self.add_images(ctx, &files);
+                }
+            }
+            PickKind::DataDir => {
+                if let Some(p) = files.into_iter().next() {
+                    self.settings_draft.data_dir = p;
+                }
+            }
+            PickKind::SyncDir => {
+                if let Some(p) = files.into_iter().next() {
+                    self.settings_draft.sync_dir = p;
+                }
+            }
         }
     }
 

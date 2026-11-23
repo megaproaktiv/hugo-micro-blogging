@@ -103,6 +103,7 @@ impl HmbApp {
         let mut reveal = false;
         let mut full_sync = false;
         let mut cleanup = false;
+        let mut pick: Option<(PickKind, PathBuf)> = None;
         egui::Window::new("Einstellungen")
             .open(&mut open)
             .default_width(520.0)
@@ -117,9 +118,7 @@ impl HmbApp {
                             d.data_dir = parse_path(&s);
                         }
                         if ui.button("Wählen …").clicked() {
-                            if let Some(p) = rfd::FileDialog::new().set_directory(&d.data_dir).pick_folder() {
-                                d.data_dir = p;
-                            }
+                            pick = Some((PickKind::DataDir, d.data_dir.clone()));
                         }
                     });
                     ui.end_row();
@@ -197,13 +196,7 @@ impl HmbApp {
                             d.sync_dir = parse_path(&s);
                         }
                         if ui.button("Wählen …").clicked() {
-                            let mut dlg = rfd::FileDialog::new();
-                            if d.sync_dir.is_dir() {
-                                dlg = dlg.set_directory(&d.sync_dir);
-                            }
-                            if let Some(p) = dlg.pick_folder() {
-                                d.sync_dir = p;
-                            }
+                            pick = Some((PickKind::SyncDir, d.sync_dir.clone()));
                         }
                     });
                     ui.end_row();
@@ -385,6 +378,9 @@ impl HmbApp {
         if apply {
             self.apply_settings();
             open = false;
+        }
+        if let Some((kind, dir)) = pick {
+            self.start_pick(ctx, kind, Some(dir));
         }
         if cleanup {
             self.confirm_cleanup = false;

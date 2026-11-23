@@ -74,7 +74,24 @@ cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Programme"
 DMG=$DIST/$NAME-$VERSION-macos-$ARCH.dmg
 rm -f "$DMG"
-hdiutil create -volname "$NAME $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" > /dev/null
+# Not via -srcfolder: its temporary volume is mounted visibly, Spotlight/XProtect scan it,
+# and the unmount then fails with "Ressource ist belegt". So: blank image, mount it
+# invisibly (-nobrowse), copy, detach, compress.
+RW=$WORK/rw.dmg
+MNT=$WORK/mnt
+SIZE=$(( $(du -sm "$STAGE" | cut -f1) + 20 ))
+hdiutil create -size "${SIZE}m" -fs HFS+ -volname "$NAME $VERSION" -ov "$RW" > /dev/null
+mkdir -p "$MNT"
+hdiutil attach "$RW" -nobrowse -noautoopen -mountpoint "$MNT" > /dev/null
+ditto "$STAGE" "$MNT"
+n=0
+until hdiutil detach "$MNT" > /dev/null 2>&1; do
+  n=$((n + 1))
+  if [ $n -ge 5 ]; then hdiutil detach -force "$MNT" > /dev/null; break; fi
+  sleep 1
+done
+hdiutil convert "$RW" -format UDZO -ov -o "$DMG" > /dev/null
+rm -f "$RW"
 shasum -a 256 "$DMG" | tee "$DMG.sha256"
 
 echo "Fertig: $DMG"

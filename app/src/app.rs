@@ -77,6 +77,13 @@ impl Editor {
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub enum PickKind {
+    Images,
+    DataDir,
+    SyncDir,
+}
+
 pub struct HmbApp {
     cfg: Config,
     data: PathBuf,
@@ -114,6 +121,8 @@ pub struct HmbApp {
     dupes: Vec<PathBuf>,
     confirm_cleanup: bool,
     startup_note: Option<String>,
+    /// file dialog running outside the event handler (see `start_pick`)
+    pending_pick: Option<(PickKind, std::sync::mpsc::Receiver<Vec<PathBuf>>)>,
 
     tray: Option<Tray>,
     quitting: bool,
@@ -153,6 +162,7 @@ impl HmbApp {
         };
 
         let mut app = HmbApp {
+            pending_pick: None,
             settings_draft: cfg.clone(),
             cfg,
             data,
@@ -635,6 +645,7 @@ impl eframe::App for HmbApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.handle_tray(ctx);
         self.handle_drops(ctx);
+        self.poll_pick(ctx);
         self.poll_sync();
         self.watch_files(ctx);
         self.shortcuts(ctx);
