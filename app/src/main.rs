@@ -45,6 +45,18 @@ fn main() -> eframe::Result<()> {
         }
     }
 
+    // `hmb --export-iconset <dir.iconset>`: icon files for the macOS app bundle (release script).
+    if let Some(i) = args.iter().position(|a| a == "--export-iconset") {
+        let dir = args.get(i + 1).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("hmb.iconset"));
+        match icon::export_iconset(&dir) {
+            Ok(()) => std::process::exit(0),
+            Err(e) => {
+                eprintln!("Icons nicht geschrieben: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     // `hmb --doc-fixture <dir>`: builds the sample blog used for the screenshots in doc/.
     if let Some(i) = args.iter().position(|a| a == "--doc-fixture") {
         let dir = args.get(i + 1).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("doc-fixture"));

@@ -79,6 +79,11 @@ hmb --screenshot bild.png   Bild des Fensters speichern und beenden
 
 Einstellungen liegen unter `~/Library/Application Support/hmb/config.json`.
 
+## Installieren (Mac)
+
+DMG aus dem GitHub-Release laden, öffnen und **hmb** auf „Programme“ ziehen. Selbst bauen:
+`./release/make-dmg.sh` – Details in [release/README.md](release/README.md).
+
 ## Bauen
 
 ```

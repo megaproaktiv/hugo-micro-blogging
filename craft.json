@@ -9,7 +9,7 @@
   "status": "ready",
   "note": "Ready: all 2 checks pass.",
   "created_ms": 1795385278285,
-  "updated_ms": 1795418771074,
+  "updated_ms": 1795419665571,
   "checks": [
     {
       "round": 1,
@@ -230,6 +230,26 @@
         "checks/round-0/screenshot.png"
       ],
       "at_ms": 1795418758958
+    },
+    {
+      "round": 12,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795419650002
+    },
+    {
+      "round": 12,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795419653528
     }
   ],
   "agent_session": "57b8a487-cacd-44a2-b649-02274356afe3",
@@ -237,7 +257,7 @@
   "agent_session_deep": false,
   "capture_deep": false,
   "allowed_actions": [],
-  "last_reply": "I'll create the guide in the \"doc\" subfolder, with real screenshots of the app for each step. To get clean, reproducible pictures without your personal data, I'm adding a hidden demo mode: it builds a sample Hugo blog in a temporary folder and opens the app in the right state for each step. Let me look at the current state first.Now the demo blog for the screenshots.Builds. Now a script that creates the sample blog and takes one picture per step, then a first run.The pictures are distinct and clear now. Writing the guide.Im Unterordner „doc“ liegt jetzt eine Einführung mit fünf echten Screenshots der App, die genau deinem Ablauf folgt: Hugo-Content-Ordner konfigurieren, Snippets per Rechtsklick sammeln, Artikel schreiben und Snippets einfügen, synchronisieren und zum Schluss mit Git pushen. Die Bilder entstehen aus einem Beispiel-Blog in einem Temp-Ordner, deine echten Daten sind darauf also nicht zu sehen. Mit einem beiliegenden Skript lassen sie sich jederzeit neu erzeugen.\n\nDas Rechtsklick-Menü von macOS selbst konnte ich nicht fotografieren, deshalb ist dieser Schritt nur beschrieben. Weil du den Projektordner umbenannt hast, zeigt der Rechtsklick-Eintrag noch auf den alten Pfad. Klick in den Einstellungen einmal auf „Neu einrichten“.",
+  "last_reply": "For a Mac release I'll build a real app bundle (hmb.app with the µ icon) and pack it into a DMG with a shortcut to the Programs folder. Let me check what the computer already offers.The DMG was created. Now I'm checking it: mounting it read-only, looking at its contents, and starting the app inside it once.The DMG works: it contains hmb.app with the µ icon and a \"Programme\" shortcut, and the app starts and draws from inside it. It's 4.7 MB. Now the release notes and instructions for GitHub.The Mac release is ready: `dist/hmb-0.1.0-macos-arm64.dmg` (4.7 MB). It contains hmb.app with the µ icon and a shortcut to \"Programme\", so installing means dragging it across. I opened the DMG and started the app from it once, and it ran. A script rebuilds it any time, and `release/README.md` plus release notes cover publishing on GitHub. I didn't publish anything; the upload is up to you, by hand or with the `gh release create …` command in the README.\n\nTwo limits:\n- **Apple Silicon only:** for Intel Macs, add the Intel build target once with `rustup target add x86_64-apple-darwin` and run the script again. It then builds one DMG for both.\n- **Unsigned:** this Mac has no Apple developer certificate, so the app is signed locally only. On first start, macOS asks for confirmation once (right-click › Open).",
   "asset_budget_usd": 5.0,
   "generate_assets": false,
   "questions": "decide",

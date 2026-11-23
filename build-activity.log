@@ -578,3 +578,41 @@
 07:26:11 done  Check app-screenshot: The program starts and draws (2640×1640).
 07:26:11 stage Ready: all 2 checks pass.
 07:26:11 stage Ready: all 2 checks pass.
+--- Craft Anything 0.6.1: a run started 2026-11-23 07:37:59 UTC ---
+07:37:59 stage Getting the builder ready…
+07:37:59 stage Improving the build…
+07:37:59 note  Asking Claude Code…
+07:38:16 said  For a Mac release I'll build a real app bundle (hmb.app with the µ icon) and pack it into a DMG with a shortcut to the Programs folder. Let me check what the computer already offers.
+07:38:16 start Running uname -m; rustup target list --installed 2>/dev/null; which hdiutil iconutil codesign lipo xcrun; security find-identity -v -p codesigning 2>/dev/null | tail -3; cd "app" && grep -n "^version" Cargo.t…
+07:38:22 done  Running uname -m; rustup target list --installed 2>/dev/null; which hdiutil iconutil codesign lipo xcrun; security find-identity -v -p codesigning 2>/dev/null | tail -3; cd "app" && grep -n "^version" Cargo.t… (5 s): arm64 aarch64-apple-darwin /usr/bin/hdiutil /usr/bin/iconutil /usr/bin/codesign /usr/bin/lipo /usr/bin/xcrun 0 valid identities found 3:version = "0.1.0" 73afa60 First version 9801fdb Alles. ###
+07:38:45 start Running cd "app" && python3 -I - <<'EOF'
+07:39:56 done  Running cd "app" && python3 -I - <<'EOF' (70 s): Finished `release` profile [optimized] target(s) in 52.66s dist/work/hmb.app: replacing existing signature hdiutil: WARNING: 'hdiutil create -volname -format ...' is deprecated. Please use 'diskut
+07:40:04 said  The DMG was created. Now I'm checking it: mounting it read-only, looking at its contents, and starting the app inside it once.
+07:40:04 start Running cd "app" && M=$(mktemp -d) && hdiutil attach -readonly -nobrowse -mountpoint "$M" dist/hmb-0.1.0-macos-arm64.dmg >/dev/null && ls -la "$M" && ls "$M/hmb.app/Contents" "$M/hmb.app/Contents/Resources" &…
+07:40:10 done  Running cd "app" && M=$(mktemp -d) && hdiutil attach -readonly -nobrowse -mountpoint "$M" dist/hmb-0.1.0-macos-arm64.dmg >/dev/null && ls -la "$M" && ls "$M/hmb.app/Contents" "$M/hmb.app/Contents/Resources" &… (6 s): hdiutil: WARNING: 'hdiutil attach -readonly -nobrowse -mountpoint ...' is deprecated. Please use 'diskutil image attach --readOnly --mountOptions nobrowse --mountPoint ...' instead. total 0 drwxr-xr-x
+07:40:23 said  The DMG works: it contains hmb.app with the µ icon and a "Programme" shortcut, and the app starts and draws from inside it. It's 4.7 MB. Now the release notes and instructions for GitHub.
+07:40:23 start Writing release/README.md
+07:40:23 done  Writing release/README.md: File created successfully at: /Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging/app/release/README.md (file state is current in your context — no need to Read it back)
+07:40:28 start Writing release/NOTES-0.1.0.md
+07:40:28 done  Writing release/NOTES-0.1.0.md: File created successfully at: /Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging/app/release/NOTES-0.1.0.md (file state is current in your context — no need to Read it back)
+07:40:33 start Running cd "app" && python3 -I - <<'EOF'
+07:40:33 start rebuild check
+07:40:49 done  Running cd "app" && python3 -I - <<'EOF' (15 s): Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.15s test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s Screenshot gespeichert: shots/now.
+07:40:49 stage The builder is checking its work…
+07:40:49 stage Checking its work (1 of 2): build…
+07:40:50 stage Checking its work (2 of 2): app-screenshot…
+07:40:53 stage The builder checked its work: all 2 checks pass.
+07:40:53 done  rebuild check (19 s): {"result":{"project":"/Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging","report":"build: passed — Build succeeded.\napp-screenshot: passed — The program starts and draws (2640×1640).\nP
+07:40:58 start core handoff write
+07:40:58 done  core handoff write: {"result":{"revision":16}}
+07:41:03 said  The Mac release is ready: `dist/hmb-0.1.0-macos-arm64.dmg` (4.7 MB). It contains hmb.app with the µ icon and a shortcut to "Programme", so installing means dragging it across. I opened the DMG and started the app from it once, and it ran. A script rebuilds it any time, and `release/README.md` plus release notes cover publishing on GitHub. I didn't publish anything; the upload is up to you, by hand or with the `gh release create …` command in the README.
+07:41:03 said  Two limits:
+07:41:03 said  - **Apple Silicon only:** for Intel Macs, add the Intel build target once with `rustup target add x86_64-apple-darwin` and run the script again. It then builds one DMG for both.
+07:41:05 said  - **Unsigned:** this Mac has no Apple developer certificate, so the app is signed locally only. On first start, macOS asks for confirmation once (right-click › Open).
+07:41:05 note  The builder's turn ended (2839882 tokens in, 8044 out)
+07:41:05 stage Checking the build…
+07:41:05 note  Nothing the check looks at has changed since it last worked, so its results stand.
+07:41:05 done  Check build: Build succeeded.
+07:41:05 done  Check app-screenshot: The program starts and draws (2640×1640).
+07:41:05 stage Ready: all 2 checks pass.
+07:41:05 stage Ready: all 2 checks pass.

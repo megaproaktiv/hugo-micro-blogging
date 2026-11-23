@@ -92,6 +92,28 @@ pub fn tray_icon_rgba(size: u32) -> Vec<u8> {
     px
 }
 
+/// Writes the PNG files of a macOS `.iconset` folder (turned into `hmb.icns` by `iconutil`).
+pub fn export_iconset(dir: &std::path::Path) -> Result<(), String> {
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    for (name, size) in [
+        ("icon_16x16", 16),
+        ("icon_16x16@2x", 32),
+        ("icon_32x32", 32),
+        ("icon_32x32@2x", 64),
+        ("icon_128x128", 128),
+        ("icon_128x128@2x", 256),
+        ("icon_256x256", 256),
+        ("icon_256x256@2x", 512),
+        ("icon_512x512", 512),
+        ("icon_512x512@2x", 1024),
+    ] {
+        let px = app_icon_rgba(size);
+        image::save_buffer(dir.join(format!("{name}.png")), &px, size, size, image::ColorType::Rgba8)
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 pub fn app_icon() -> eframe::egui::IconData {
     let size = 256;
     eframe::egui::IconData { rgba: app_icon_rgba(size), width: size, height: size }
