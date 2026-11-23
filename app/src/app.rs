@@ -120,6 +120,8 @@ pub struct HmbApp {
     hint_minimized: bool,
 
     screenshot: Option<PathBuf>,
+    /// `--doc-view <name>`: state shown for a screenshot in doc/ (main, settings, snippets, editor, sync)
+    doc_view: Option<String>,
     frames: u32,
     shot_requested: bool,
 }
@@ -185,6 +187,7 @@ impl HmbApp {
             quitting: false,
             hint_minimized: false,
             screenshot,
+            doc_view: None,
             frames: 0,
             shot_requested: false,
         };
@@ -205,7 +208,24 @@ impl HmbApp {
                 .unwrap_or(0);
             app.open_article(idx);
         }
-        let msg = format!("{} Einträge geladen aus {}", app.articles.len(), app.data.display());
+        let args: Vec<String> = std::env::args().collect();
+        app.doc_view = args.iter().position(|a| a == "--doc-view").and_then(|i| args.get(i + 1)).cloned();
+        match app.doc_view.as_deref() {
+            Some("settings") => {
+                app.settings_draft = app.cfg.clone();
+                app.show_settings = true;
+            }
+            Some("snippets") => app.show_snippets = true,
+            Some("editor") => {
+                app.view = ViewMode::Split;
+                if let Some(ed) = &mut app.editor {
+                    ed.tag_input = "le".into(); // shows the tag suggestions while typing
+                }
+            }
+            Some("main") => app.view = ViewMode::Preview,
+            _ => {}
+        }
+        let msg = format!("{} Einträge geladen aus {}", app.articles.len(), widgets::show_path(&app.data));
         app.set_status(msg, true);
         if let Some(note) = app.startup_note.take() {
             app.set_status(note, true);
@@ -568,6 +588,9 @@ impl HmbApp {
         let Some(path) = self.screenshot.clone() else { return };
         self.frames += 1;
         ctx.request_repaint();
+        if self.frames == 3 && self.doc_view.as_deref() == Some("sync") {
+            self.start_sync(ctx, false);
+        }
         if self.frames >= 120 && !self.shot_requested {
             self.shot_requested = true;
             ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
@@ -584,7 +607,15 @@ impl HmbApp {
             if let Some(d) = path.parent() {
                 let _ = std::fs::create_dir_all(d);
             }
-            match image::save_buffer(&path, &bytes, w as u32, h as u32, image::ColorType::Rgba8) {
+            let saved = if self.doc_view.is_some() && w > 1600 {
+                // pictures for the guide: smaller files
+                let full = image::RgbaImage::from_raw(w as u32, h as u32, bytes.clone()).unwrap_or_default();
+                let nh = (h as f32 * 1600.0 / w as f32) as u32;
+                image::imageops::resize(&full, 1600, nh, image::imageops::FilterType::Lanczos3).save(&path)
+            } else {
+                image::save_buffer(&path, &bytes, w as u32, h as u32, image::ColorType::Rgba8)
+            };
+            match saved {
                 Ok(()) => println!("Screenshot gespeichert: {}", path.display()),
                 Err(e) => eprintln!("Screenshot fehlgeschlagen: {e}"),
             }

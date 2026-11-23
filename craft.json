@@ -9,7 +9,7 @@
   "status": "ready",
   "note": "Ready: all 2 checks pass.",
   "created_ms": 1795385278285,
-  "updated_ms": 1795390480139,
+  "updated_ms": 1795418771074,
   "checks": [
     {
       "round": 1,
@@ -210,6 +210,26 @@
         "checks/round-0/screenshot.png"
       ],
       "at_ms": 1795390470690
+    },
+    {
+      "round": 11,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795418755253
+    },
+    {
+      "round": 11,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (2640×1640).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795418758958
     }
   ],
   "agent_session": "57b8a487-cacd-44a2-b649-02274356afe3",
@@ -217,7 +237,7 @@
   "agent_session_deep": false,
   "capture_deep": false,
   "allowed_actions": [],
-  "last_reply": "The open question was technical and badly worded on my part. In plain terms it was: \"How should the articles get into the Hugo website?\" Your earlier answers already settle it: the app copies the articles into the blog's content folder, and Git and Hugo take care of the rest. I'll close the question and have the app show in the settings when the sync folder belongs to a Hugo website.The question was badly worded on my part. In plain terms it was: \"How do the articles get into your Hugo website?\" Your earlier answers already settled it: the app copies the articles into the blog's content folder, and Git and Hugo take care of the rest, so I've closed the question.\n\nIn the settings, the app now also shows under the sync folder whether that folder belongs to a Hugo website, by looking for its hugo.toml one level up. It reports either \"Gehört zur Hugo-Seite …\" or a hint that no Hugo website was found. Build, tests and check pass, and there are no open questions left.",
+  "last_reply": "I'll create the guide in the \"doc\" subfolder, with real screenshots of the app for each step. To get clean, reproducible pictures without your personal data, I'm adding a hidden demo mode: it builds a sample Hugo blog in a temporary folder and opens the app in the right state for each step. Let me look at the current state first.Now the demo blog for the screenshots.Builds. Now a script that creates the sample blog and takes one picture per step, then a first run.The pictures are distinct and clear now. Writing the guide.Im Unterordner „doc“ liegt jetzt eine Einführung mit fünf echten Screenshots der App, die genau deinem Ablauf folgt: Hugo-Content-Ordner konfigurieren, Snippets per Rechtsklick sammeln, Artikel schreiben und Snippets einfügen, synchronisieren und zum Schluss mit Git pushen. Die Bilder entstehen aus einem Beispiel-Blog in einem Temp-Ordner, deine echten Daten sind darauf also nicht zu sehen. Mit einem beiliegenden Skript lassen sie sich jederzeit neu erzeugen.\n\nDas Rechtsklick-Menü von macOS selbst konnte ich nicht fotografieren, deshalb ist dieser Schritt nur beschrieben. Weil du den Projektordner umbenannt hast, zeigt der Rechtsklick-Eintrag noch auf den alten Pfad. Klick in den Einstellungen einmal auf „Neu einrichten“.",
   "asset_budget_usd": 5.0,
   "generate_assets": false,
   "questions": "decide",

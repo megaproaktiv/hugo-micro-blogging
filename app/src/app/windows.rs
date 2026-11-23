@@ -1,6 +1,6 @@
 //! Small windows: delete confirmation, "what's new" after sync, settings, tag ontology, snippets.
 
-use super::widgets::{mtime, short};
+use super::widgets::{mtime, parse_path, short, show_path};
 use super::*;
 use crate::service;
 use eframe::egui::{CornerRadius, Margin, RichText, Stroke, Vec2};
@@ -112,9 +112,9 @@ impl HmbApp {
                 egui::Grid::new("settings").num_columns(2).spacing([12.0, 10.0]).show(ui, |ui| {
                     ui.label("Datenordner");
                     ui.horizontal(|ui| {
-                        let mut s = d.data_dir.display().to_string();
+                        let mut s = show_path(&d.data_dir);
                         if ui.add(egui::TextEdit::singleline(&mut s).desired_width(300.0)).changed() {
-                            d.data_dir = PathBuf::from(s);
+                            d.data_dir = parse_path(&s);
                         }
                         if ui.button("Wählen …").clicked() {
                             if let Some(p) = rfd::FileDialog::new().set_directory(&d.data_dir).pick_folder() {
@@ -185,7 +185,7 @@ impl HmbApp {
 
                     ui.label("Sync-Ordner");
                     ui.horizontal(|ui| {
-                        let mut s = d.sync_dir.display().to_string();
+                        let mut s = show_path(&d.sync_dir);
                         if ui
                             .add(
                                 egui::TextEdit::singleline(&mut s)
@@ -194,7 +194,7 @@ impl HmbApp {
                             )
                             .changed()
                         {
-                            d.sync_dir = PathBuf::from(s);
+                            d.sync_dir = parse_path(&s);
                         }
                         if ui.button("Wählen …").clicked() {
                             let mut dlg = rfd::FileDialog::new();
@@ -213,7 +213,7 @@ impl HmbApp {
                             Some((site, file)) => ui.label(
                                 RichText::new(format!(
                                     "✔ Gehört zur Hugo-Seite {} ({file}) – Artikel landen direkt im Blog, Git und Hugo erledigen den Rest.",
-                                    site.display()
+                                    show_path(&site)
                                 ))
                                 .small()
                                 .color(OK),
@@ -331,7 +331,7 @@ impl HmbApp {
                 ui.separator();
                 ui.label(RichText::new("Rechtsklick-Menü (macOS)").strong());
                 let txt = format!(
-                    "Richtet den Dienst „{}“ ein: Text irgendwo markieren → Rechtsklick → Dienste.",
+                    "Richtet den Dienst „{}“ ein: Text irgendwo markieren › Rechtsklick › Dienste.",
                     service::SERVICE_NAME
                 );
                 ui.label(RichText::new(txt).small().color(MUTED));
@@ -497,7 +497,7 @@ impl HmbApp {
             .show(ctx, |ui| {
                 ui.label(
                     RichText::new(
-                        "Kleine Textbausteine. Neue kommen über Rechtsklick → Dienste → „Als hmb-Snippet speichern“ oder hier.",
+                        "Kleine Textbausteine. Neue kommen über Rechtsklick › Dienste › „Als hmb-Snippet speichern“ oder hier.",
                     )
                     .small()
                     .color(MUTED),

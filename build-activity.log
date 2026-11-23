@@ -519,3 +519,62 @@
 23:34:40 done  Check app-screenshot: The program starts and draws (2640×1640).
 23:34:40 stage Ready: all 2 checks pass.
 23:34:40 stage Ready: all 2 checks pass.
+--- Craft Anything 0.6.1: a run started 2026-11-23 07:20:55 UTC ---
+07:20:55 stage Getting the builder ready…
+07:20:55 stage Improving the build…
+07:20:55 note  Asking Claude Code…
+07:21:52 said  I'll create the guide in the "doc" subfolder, with real screenshots of the app for each step. To get clean, reproducible pictures without your personal data, I'm adding a hidden demo mode: it builds a sample Hugo blog in a temporary folder and opens the app in the right state for each step. Let me look at the current state first.
+07:21:52 start Running cd "/Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging" && ls; git status --short | head; ls app; grep -n "screenshot" app/src/main.rs | head; grep -n "screenshot: Option<PathBuf>\|frames…
+07:21:58 done  Running cd "/Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging" && ls; git status --short | head; ls app; grep -n "screenshot" app/src/main.rs | head; grep -n "screenshot: Option<PathBuf>\|frames… (5 s): agent-session.jsonl app attachments build-activity.log capture checks craft.json feed.json inbox investigation.cany pinned reference usage.json M build-activity.log M craft.json M feed.json M usag
+07:22:04 start Reading src/app.rs
+07:22:04 done  Reading src/app.rs: 196 } 197 } 198 app.reload(); 199 app.expanded = app.onto.parents.values().cloned().collect(); 200 if app.screenshot.is_some() && !app.articles.is_empty() {
+07:22:05 start Reading src/app.rs
+07:22:05 done  Reading src/app.rs: 565 } 566 567 fn screenshot_step(&mut self, ctx: &egui::Context) { 568 let Some(path) = self.screenshot.clone() else { return }; 569 self.frames += 1; 570 ctx.request_
+07:22:37 said  Now the demo blog for the screenshots.
+07:22:37 start Writing src/docfixture.rs
+07:22:37 done  Writing src/docfixture.rs: File created successfully at: /Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging/app/src/docfixture.rs (file state is current in your context — no need to Read it back)
+07:22:54 start Running cd "src" && python3 -I - <<'EOF'
+07:22:54 done  Running cd "src" && python3 -I - <<'EOF': 115: let mut s = d.data_dir.display().to_string(); 117: d.data_dir = PathBuf::from(s); 188: let mut s = d.sync_dir.display().to
+07:23:02 start Running cd "src" && python3 -I - <<'EOF'
+07:23:13 done  Running cd "src" && python3 -I - <<'EOF' (11 s): 215: "✔ Gehört zur Hugo-Seite {} ({file}) – Artikel landen direkt im Blog, Git und Hugo erledigen den Rest.", 216- show_path(&site
+07:23:20 said  Builds. Now a script that creates the sample blog and takes one picture per step, then a first run.
+07:23:20 start Running cd "app" && mkdir -p doc/img && cat > doc/make-screenshots.sh <<'EOF'
+07:23:51 done  Running cd "app" && mkdir -p doc/img && cat > doc/make-screenshots.sh <<'EOF' (31 s): Screenshot gespeichert: /Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging/app/doc/img/00-uebersicht.png Screenshot gespeichert: /Users/gernotglawe/Documents/Craft Anything/hugo-micro-blo
+07:23:54 start Reading doc/img/01-einstellungen.png
+07:23:54 done  Reading doc/img/01-einstellungen.png
+07:23:54 start Reading doc/img/04-synchronisieren.png
+07:23:54 done  Reading doc/img/04-synchronisieren.png
+07:24:14 start Running cd "app" && grep -rn "→" src --include=*.rs | grep -v "^\S*:\s*//" | grep -v "//!" | grep -v "/// " | cut -c1-140
+07:24:14 done  Running cd "app" && grep -rn "→" src --include=*.rs | grep -v "^\S*:\s*//" | grep -v "//!" | grep -v "/// " | cut -c1-140: (eval):1: no matches found: --include=*.rs
+07:24:17 start Searching for "[^"]*→[^"]*"
+07:24:17 done  Searching for "[^"]*→[^"]*": src/app/widgets.rs:92: "Diese ID gibt es mehrfach. Dieser Ordner: {}\nEinstellungen (⚙) → „Doppelte Ordner reparieren“", src/app/windows.rs:334: "Richtet
+07:24:23 start Running cd "app" && python3 -I - <<'EOF'
+07:24:57 done  Running cd "app" && python3 -I - <<'EOF' (34 s): 224 . 128 .. 444237 00-uebersicht.png 648106 01-einstellungen.png 570443 02-snippets.png 534041 03-editor.png 589132 04-synchronisieren.png
+07:24:59 start Reading doc/img/02-snippets.png
+07:24:59 done  Reading doc/img/02-snippets.png
+07:25:00 start Reading doc/img/03-editor.png
+07:25:00 done  Reading doc/img/03-editor.png
+07:25:00 start Reading doc/img/00-uebersicht.png
+07:25:00 done  Reading doc/img/00-uebersicht.png
+07:25:34 said  The pictures are distinct and clear now. Writing the guide.
+07:25:34 start Writing doc/README.md
+07:25:34 done  Writing doc/README.md: File created successfully at: /Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging/app/doc/README.md (file state is current in your context — no need to Read it back)
+07:25:36 start Running cd "app" && python3 -I - <<'EOF'
+07:25:51 done  Running cd "app" && python3 -I - <<'EOF' (15 s): Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.06s test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s Screenshot gespeichert: shots/now.
+07:25:53 start rebuild check
+07:25:53 stage The builder is checking its work…
+07:25:53 stage Checking its work (1 of 2): build…
+07:25:55 stage Checking its work (2 of 2): app-screenshot…
+07:25:58 stage The builder checked its work: all 2 checks pass.
+07:25:59 done  rebuild check (5 s): {"result":{"project":"/Users/gernotglawe/Documents/Craft Anything/hugo-micro-blogging","report":"build: passed — Build succeeded.\napp-screenshot: passed — The program starts and draws (2640×1640).\nP
+07:26:04 start core handoff write
+07:26:04 done  core handoff write: {"result":{"revision":15}}
+07:26:09 said  Im Unterordner „doc“ liegt jetzt eine Einführung mit fünf echten Screenshots der App, die genau deinem Ablauf folgt: Hugo-Content-Ordner konfigurieren, Snippets per Rechtsklick sammeln, Artikel schreiben und Snippets einfügen, synchronisieren und zum Schluss mit Git pushen. Die Bilder entstehen aus einem Beispiel-Blog in einem Temp-Ordner, deine echten Daten sind darauf also nicht zu sehen. Mit einem beiliegenden Skript lassen sie sich jederzeit neu erzeugen.
+07:26:10 said  Das Rechtsklick-Menü von macOS selbst konnte ich nicht fotografieren, deshalb ist dieser Schritt nur beschrieben. Weil du den Projektordner umbenannt hast, zeigt der Rechtsklick-Eintrag noch auf den alten Pfad. Klick in den Einstellungen einmal auf „Neu einrichten“.
+07:26:10 note  The builder's turn ended (5401456 tokens in, 19311 out)
+07:26:11 stage Checking the build…
+07:26:11 note  Nothing the check looks at has changed since it last worked, so its results stand.
+07:26:11 done  Check build: Build succeeded.
+07:26:11 done  Check app-screenshot: The program starts and draws (2640×1640).
+07:26:11 stage Ready: all 2 checks pass.
+07:26:11 stage Ready: all 2 checks pass.

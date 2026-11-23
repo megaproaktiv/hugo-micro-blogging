@@ -89,7 +89,7 @@ pub(super) fn entry_card(ui: &mut egui::Ui, a: &Article, selected: bool, dup: bo
                     }
                     if dup {
                         ui.label(RichText::new("⚠ doppelt").small().color(DANGER)).on_hover_text(format!(
-                            "Diese ID gibt es mehrfach. Dieser Ordner: {}\nEinstellungen (⚙) → „Doppelte Ordner reparieren“",
+                            "Diese ID gibt es mehrfach. Dieser Ordner: {}\nEinstellungen (⚙) › „Doppelte Ordner reparieren“",
                             a.rel_dir
                         ));
                     }
@@ -209,4 +209,28 @@ pub(super) fn first_words(body: &str, n: usize) -> String {
 
 pub(super) fn mtime(p: &std::path::Path) -> Option<SystemTime> {
     std::fs::metadata(p).ok().and_then(|m| m.modified().ok())
+}
+
+/// Path for display: the home folder is shown as `~`.
+pub(super) fn show_path(p: &std::path::Path) -> String {
+    if let Some(home) = dirs::home_dir() {
+        if let Ok(rest) = p.strip_prefix(&home) {
+            return format!("~/{}", rest.display());
+        }
+    }
+    p.display().to_string()
+}
+
+/// Path typed by the person: a leading `~` means the home folder.
+pub(super) fn parse_path(s: &str) -> PathBuf {
+    let s = s.trim();
+    if let (Some(rest), Some(home)) = (s.strip_prefix("~/"), dirs::home_dir()) {
+        return home.join(rest);
+    }
+    if s == "~" {
+        if let Some(home) = dirs::home_dir() {
+            return home;
+        }
+    }
+    PathBuf::from(s)
 }

@@ -3,6 +3,8 @@
 **hmb** steht für **Hugo Microblogger**: eine kleine Desktop-App, um kurze Markdown-Artikel für einen
 Hugo-Blog zu schreiben, mit Tags zu ordnen und zwischen Ordnern abzugleichen.
 
+**Einführung mit Screenshots:** [doc/README.md](doc/README.md)
+
 ## Was hmb kann
 
 - **Liste mit 10 Einträgen pro Seite** – Überschrift, Datum, Tags und ein Abstract von höchstens 3 Zeilen.

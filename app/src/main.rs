@@ -1,6 +1,7 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 mod app;
+mod docfixture;
 mod icon;
 mod service;
 mod store;
@@ -39,6 +40,18 @@ fn main() -> eframe::Result<()> {
             }
             Err(e) => {
                 eprintln!("Synchronisieren fehlgeschlagen: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
+    // `hmb --doc-fixture <dir>`: builds the sample blog used for the screenshots in doc/.
+    if let Some(i) = args.iter().position(|a| a == "--doc-fixture") {
+        let dir = args.get(i + 1).map(PathBuf::from).unwrap_or_else(|| PathBuf::from("doc-fixture"));
+        match docfixture::build(&dir) {
+            Ok(()) => std::process::exit(0),
+            Err(e) => {
+                eprintln!("Beispiel nicht aufgebaut: {e}");
                 std::process::exit(1);
             }
         }
