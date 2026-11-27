@@ -1,0 +1,4 @@
+2026-11-27 16:20:29.357 hmb[54734:627410] NSKeyBindingManager: Bad key binding atom for '[F' = 'moveToEndOfLine:'
+2026-11-27 16:20:29.357 hmb[54734:627410] NSKeyBindingManager: Bad key binding atom for '[H' = 'moveToBeginningOfLine:'
+2026-11-27 16:20:29.357 hmb[54734:627410] NSKeyBindingManager: Bad key binding atom for '$[F' = 'moveToEndOfLineAndModifySelection:'
+2026-11-27 16:20:29.357 hmb[54734:627410] NSKeyBindingManager: Bad key binding atom for '$[H' = 'moveToBeginningOfLineAndModifySelection:'

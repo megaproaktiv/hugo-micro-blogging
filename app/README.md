@@ -15,6 +15,27 @@ Hugo-Blog zu schreiben, mit Tags zu ordnen und zwischen Ordnern abzugleichen.
 - **Snippets** – kleine Textbausteine, auch systemweit per Rechtsklick → Dienste → „Als hmb-Snippet speichern“.
 - **Menüleisten-Symbol**, um hmb jederzeit aufzurufen.
 
+## Profile (mehrere Hugo-Seiten)
+
+Oben links wählst du das **Profil** – eine Hugo-Seite mit Titel (bis 32 Zeichen), eigenem Datenordner,
+eigenem Sync-Ordner, eigenem Sync-Stand und eigenem Git-Repository. Beim Wechsel liest hmb die Artikel
+aus dem Datenordner dieses Profils und gleicht mit dessen Sync-Ordner ab. „+ Neues Profil …“ legt ein
+Profil mit eigenem Datenordner an; entfernen lässt es sich in den Einstellungen (die Ordner bleiben).
+
+## Git: Pull, Commit, Push
+
+Der Knopf **Git** oben rechts öffnet das Git-Fenster für das Repository des Blogs (das Repository, in
+dem der Sync-Ordner liegt, oder das in den Einstellungen eingetragene):
+
+1. **Pull** holt Neues vom Server (`git pull --rebase --autostash`); danach „Jetzt synchronisieren“.
+2. **Commit**: hmb listet, was seit dem letzten Commit neu, geändert und gelöscht ist, und schlägt
+   die Nachricht vor – erste Zeile ist der zuletzt geänderte Eintrag, darunter die drei Listen.
+   Standardmäßig nur Blog-Inhalte (content, transactions, Snippets, Tags).
+3. **Push** schickt die Commits zum Server; die Meldung von Git steht unten im Fenster.
+
+Git nutzt die Anmeldung dieses Rechners (SSH-Schlüssel oder Schlüsselbund) und fragt nie nach
+einem Passwort – fehlt die Anmeldung, steht die Fehlermeldung in der Ausgabe.
+
 ## Ordnerstruktur (einstellbar)
 
 - **Nach Datum:** `JJJJ/MM/TT/<name>/index.md`, Abstract im Frontmatter (`abstract:`).
@@ -71,7 +92,7 @@ Eine Transaktionsdatei sieht so aus:
 
 ```
 hmb                         Fenster öffnen
-hmb --sync                  einmal synchronisieren
+hmb --sync                  einmal synchronisieren (HMB_PROFILE=<Titel> wählt ein Profil)
 hmb --full-sync             Vollsynchronisierung
 hmb --snippet [Text]        Snippet speichern (ohne Text: von der Standardeingabe)
 hmb --screenshot bild.png   Bild des Fensters speichern und beenden

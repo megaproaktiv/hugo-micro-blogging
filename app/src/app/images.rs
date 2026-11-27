@@ -76,7 +76,7 @@ impl HmbApp {
                         .into_iter()
                         .map(|f| f.path().to_path_buf())
                         .collect(),
-                    PickKind::DataDir | PickKind::SyncDir => {
+                    PickKind::DataDir | PickKind::SyncDir | PickKind::GitRepo => {
                         dlg.pick_folder().await.map(|f| vec![f.path().to_path_buf()]).unwrap_or_default()
                     }
                 }
@@ -105,6 +105,11 @@ impl HmbApp {
             PickKind::DataDir => {
                 if let Some(p) = files.into_iter().next() {
                     self.settings_draft.data_dir = p;
+                }
+            }
+            PickKind::GitRepo => {
+                if let Some(p) = files.into_iter().next() {
+                    self.settings_draft.git_repo = p;
                 }
             }
             PickKind::SyncDir => {

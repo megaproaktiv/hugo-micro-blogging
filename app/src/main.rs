@@ -2,6 +2,7 @@
 
 mod app;
 mod docfixture;
+mod gitops;
 mod icon;
 mod service;
 mod store;

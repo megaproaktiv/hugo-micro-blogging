@@ -103,6 +103,7 @@ impl HmbApp {
         let mut reveal = false;
         let mut full_sync = false;
         let mut cleanup = false;
+        let mut remove_profile = false;
         let mut pick: Option<(PickKind, PathBuf)> = None;
         egui::Window::new("Einstellungen")
             .open(&mut open)
@@ -111,6 +112,28 @@ impl HmbApp {
             .show(ctx, |ui| {
                 let d = &mut self.settings_draft;
                 egui::Grid::new("settings").num_columns(2).spacing([12.0, 10.0]).show(ui, |ui| {
+                    ui.label("Profil-Titel");
+                    ui.horizontal(|ui| {
+                        ui.add(
+                            egui::TextEdit::singleline(&mut d.title)
+                                .char_limit(store::TITLE_MAX)
+                                .hint_text("z. B. Nachtgedanken")
+                                .desired_width(220.0),
+                        );
+                        ui.label(
+                            RichText::new(format!("{}/{}", d.title.chars().count(), store::TITLE_MAX))
+                                .small()
+                                .color(MUTED),
+                        );
+                    });
+                    ui.end_row();
+                    ui.label("");
+                    ui.label(
+                        RichText::new("Jedes Profil ist eine Hugo-Seite mit eigenem Datenordner, Sync-Ordner und Git-Repository – Wechsel oben links im Auswahlfeld.")
+                            .small()
+                            .color(MUTED),
+                    );
+                    ui.end_row();
                     ui.label("Datenordner");
                     ui.horizontal(|ui| {
                         let mut s = show_path(&d.data_dir);
@@ -219,6 +242,25 @@ impl HmbApp {
                         };
                         ui.end_row();
                     }
+                    ui.label("Git-Repository");
+                    ui.horizontal(|ui| {
+                        let mut s = show_path(&d.git_repo);
+                        if ui
+                            .add(
+                                egui::TextEdit::singleline(&mut s)
+                                    .hint_text("leer = Repository des Sync-Ordners")
+                                    .desired_width(300.0),
+                            )
+                            .changed()
+                        {
+                            d.git_repo = if s.trim().is_empty() { PathBuf::new() } else { parse_path(&s) };
+                        }
+                        if ui.button("Wählen …").clicked() {
+                            let start = if d.git_repo.as_os_str().is_empty() { d.sync_dir.clone() } else { d.git_repo.clone() };
+                            pick = Some((PickKind::GitRepo, start));
+                        }
+                    });
+                    ui.end_row();
                     ui.label("Name dieses Rechners");
                     ui.add(egui::TextEdit::singleline(&mut d.client).desired_width(160.0));
                     ui.end_row();
@@ -364,6 +406,29 @@ impl HmbApp {
                         reveal = true;
                     }
                 });
+                if self.profiles.profiles.len() > 1 {
+                    ui.add_space(4.0);
+                    ui.horizontal(|ui| {
+                        if !self.confirm_delete_profile {
+                            if ui
+                                .button(RichText::new("Profil entfernen …").color(DANGER))
+                                .on_hover_text("Nimmt das Profil aus der Liste – Ordner und Artikel bleiben erhalten")
+                                .clicked()
+                            {
+                                self.confirm_delete_profile = true;
+                            }
+                        } else {
+                            ui.label(RichText::new(format!("Profil „{}“ wirklich entfernen?", self.cfg.title)).color(DANGER));
+                            let b = egui::Button::new(RichText::new("Entfernen").color(Color32::WHITE)).fill(DANGER);
+                            if ui.add(b).clicked() {
+                                remove_profile = true;
+                            }
+                            if ui.button("Abbrechen").clicked() {
+                                self.confirm_delete_profile = false;
+                            }
+                        }
+                    });
+                }
             });
         if reveal {
             let _ = std::fs::create_dir_all(&self.data);
@@ -381,6 +446,10 @@ impl HmbApp {
         }
         if let Some((kind, dir)) = pick {
             self.start_pick(ctx, kind, Some(dir));
+        }
+        if remove_profile {
+            self.delete_profile();
+            open = false;
         }
         if cleanup {
             self.confirm_cleanup = false;

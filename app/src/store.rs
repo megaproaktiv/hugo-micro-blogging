@@ -45,6 +45,8 @@ pub enum ImageStyle {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
+    /// Name of this profile (one Hugo site), at most 32 characters.
+    pub title: String,
     pub data_dir: PathBuf,
     /// Content folder inside the data folder ("" = the data folder itself).
     pub content_subdir: String,
@@ -64,6 +66,10 @@ pub struct Config {
     pub client: String,
     /// RFC 3339 time of the last successful sync.
     pub last_sync: Option<String>,
+    /// Git repository for Pull/Commit/Push (empty = the repository that holds the sync folder).
+    pub git_repo: PathBuf,
+    /// Commit only blog content (content folder, transactions, snippets, tags), not other files.
+    pub git_blog_only: bool,
 }
 
 impl Default for Config {
@@ -72,6 +78,7 @@ impl Default for Config {
             .or_else(dirs::home_dir)
             .unwrap_or_else(|| PathBuf::from("."));
         Config {
+            title: DEFAULT_TITLE.into(),
             data_dir: docs.join("hmb"),
             content_subdir: CONTENT_DIR.into(),
             layout: Layout::Dated,
@@ -84,7 +91,67 @@ impl Default for Config {
             last_tx_files: Vec::new(),
             client: default_client_name(),
             last_sync: None,
+            git_repo: PathBuf::new(),
+            git_blog_only: true,
         }
+    }
+}
+
+pub const DEFAULT_TITLE: &str = "Mein Blog";
+pub const TITLE_MAX: usize = 32;
+
+/// Profile title: trimmed, at most 32 characters, never empty.
+pub fn clean_title(t: &str) -> String {
+    let t: String = t.trim().chars().take(TITLE_MAX).collect();
+    if t.trim().is_empty() {
+        DEFAULT_TITLE.into()
+    } else {
+        t.trim().to_string()
+    }
+}
+
+/// All profiles (one per Hugo site) and which one is open.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Profiles {
+    pub active: usize,
+    pub profiles: Vec<Config>,
+}
+
+impl Default for Profiles {
+    fn default() -> Self {
+        Profiles { active: 0, profiles: vec![Config::default()] }
+    }
+}
+
+impl Profiles {
+    pub fn active(&self) -> &Config {
+        &self.profiles[self.active.min(self.profiles.len() - 1)]
+    }
+    pub fn titles(&self) -> Vec<String> {
+        self.profiles.iter().map(|p| p.title.clone()).collect()
+    }
+    /// A title not used by another profile (adds " 2", " 3" …).
+    pub fn unique_title(&self, wanted: &str, except: Option<usize>) -> String {
+        let base = clean_title(wanted);
+        let taken = |t: &str| {
+            self.profiles
+                .iter()
+                .enumerate()
+                .any(|(i, p)| Some(i) != except && p.title.eq_ignore_ascii_case(t))
+        };
+        if !taken(&base) {
+            return base;
+        }
+        for n in 2.. {
+            let suffix = format!(" {n}");
+            let head: String = base.chars().take(TITLE_MAX - suffix.chars().count()).collect();
+            let t = format!("{}{suffix}", head.trim_end());
+            if !taken(&t) {
+                return t;
+            }
+        }
+        unreachable!()
     }
 }
 
@@ -160,21 +227,79 @@ fn old_config_path() -> PathBuf {
         .join("config.json")
 }
 
-pub fn load_config() -> Config {
-    fs::read_to_string(config_path())
-        .or_else(|_| fs::read_to_string(old_config_path()))
-        .ok()
-        .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or_default()
+/// Title for a profile made from settings of an earlier version: the Hugo site's folder name.
+fn title_from(cfg: &Config) -> String {
+    if !cfg.sync_dir.as_os_str().is_empty() {
+        if let Some((site, _)) = hugo_site_of(&cfg.sync_dir) {
+            if let Some(n) = site.file_name() {
+                return clean_title(&n.to_string_lossy());
+            }
+        }
+    }
+    DEFAULT_TITLE.into()
 }
 
-pub fn save_config(cfg: &Config) -> Result<(), String> {
-    let p = config_path();
-    if let Some(d) = p.parent() {
+/// All profiles. Settings of earlier versions (a single configuration) become the first profile.
+pub fn load_profiles() -> Profiles {
+    let text = fs::read_to_string(config_path())
+        .or_else(|_| fs::read_to_string(old_config_path()))
+        .ok();
+    let Some(text) = text else { return Profiles::default() };
+    parse_profiles(&text)
+}
+
+/// Profile list from the settings file; a single configuration (earlier versions) becomes profile 1.
+pub fn parse_profiles(text: &str) -> Profiles {
+    let value: serde_json::Value = serde_json::from_str(&text).unwrap_or(serde_json::Value::Null);
+    let mut p = if value.get("profiles").is_some() {
+        serde_json::from_value::<Profiles>(value).unwrap_or_default()
+    } else {
+        let mut cfg: Config = serde_json::from_value(value).unwrap_or_default();
+        if cfg.title.trim().is_empty() || !text.contains("\"title\"") {
+            cfg.title = title_from(&cfg);
+        }
+        Profiles { active: 0, profiles: vec![cfg] }
+    };
+    if p.profiles.is_empty() {
+        p.profiles.push(Config::default());
+    }
+    p.active = p.active.min(p.profiles.len() - 1);
+    for c in &mut p.profiles {
+        c.title = clean_title(&c.title);
+    }
+    p
+}
+
+pub fn save_profiles(p: &Profiles) -> Result<(), String> {
+    let path = config_path();
+    if let Some(d) = path.parent() {
         fs::create_dir_all(d).map_err(|e| e.to_string())?;
     }
-    let s = serde_json::to_string_pretty(cfg).map_err(|e| e.to_string())?;
-    fs::write(p, s).map_err(|e| e.to_string())
+    let s = serde_json::to_string_pretty(p).map_err(|e| e.to_string())?;
+    fs::write(path, s).map_err(|e| e.to_string())
+}
+
+/// The open profile. `HMB_PROFILE=<title>` picks another one (command line use).
+pub fn load_config() -> Config {
+    let p = load_profiles();
+    if let Ok(want) = std::env::var("HMB_PROFILE") {
+        if let Some(c) = p.profiles.iter().find(|c| c.title.eq_ignore_ascii_case(want.trim())) {
+            return c.clone();
+        }
+    }
+    p.active().clone()
+}
+
+/// Stores `cfg` as the profile with the same title (or the open one).
+pub fn save_config(cfg: &Config) -> Result<(), String> {
+    let mut p = load_profiles();
+    let i = p
+        .profiles
+        .iter()
+        .position(|c| c.title == cfg.title)
+        .unwrap_or(p.active);
+    p.profiles[i] = cfg.clone();
+    save_profiles(&p)
 }
 
 // ---------------------------------------------------------------- articles
@@ -760,6 +885,10 @@ pub struct TxFile {
 
 /// The level of a content folder: its parent (transactions etc. live there).
 pub fn meta_of(content: &Path) -> PathBuf {
+    // inside a Hugo site (also for a sub folder like content/post): next to its content folder
+    if let Some((site, _)) = hugo_site_of(content) {
+        return site;
+    }
     content
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -769,11 +898,22 @@ pub fn meta_of(content: &Path) -> PathBuf {
 
 /// The Hugo website a content folder belongs to (the folder above it with a Hugo config file).
 pub fn hugo_site_of(content: &Path) -> Option<(PathBuf, String)> {
-    let site = meta_of(content);
-    ["hugo.toml", "hugo.yaml", "hugo.yml", "hugo.json", "config.toml", "config.yaml", "config.json"]
-        .iter()
-        .find(|f| site.join(f).is_file())
-        .map(|f| (site.clone(), f.to_string()))
+    // the nearest folder above `content` with a Hugo config (content/post -> the site root)
+    let mut cur = content.parent();
+    for _ in 0..6 {
+        let dir = cur?;
+        if dir.as_os_str().is_empty() {
+            return None;
+        }
+        if let Some(f) = ["hugo.toml", "hugo.yaml", "hugo.yml", "hugo.json", "config.toml", "config.yaml", "config.json"]
+            .iter()
+            .find(|f| dir.join(f).is_file())
+        {
+            return Some((dir.to_path_buf(), f.to_string()));
+        }
+        cur = dir.parent();
+    }
+    None
 }
 
 /// Local changes not yet synced (app-internal, next to the content folder).
@@ -1126,6 +1266,41 @@ mod hugo_tests {
         assert!(hugo_site_of(&t.join("site/content")).is_none());
         fs::write(t.join("site/hugo.toml"), "title = 'x'").unwrap();
         assert_eq!(hugo_site_of(&t.join("site/content")).unwrap().1, "hugo.toml");
+        // a sub folder of content (content/post): transactions etc. still go to the site root
+        fs::create_dir_all(t.join("site/content/post")).unwrap();
+        assert_eq!(hugo_site_of(&t.join("site/content/post")).unwrap().0, t.join("site"));
+        assert_eq!(meta_of(&t.join("site/content/post")), t.join("site"));
         let _ = fs::remove_dir_all(&t);
+    }
+}
+
+#[cfg(test)]
+mod profile_tests {
+    use super::*;
+
+    #[test]
+    fn old_single_config_becomes_first_profile() {
+        let old = r#"{"data_dir":"/tmp/x","content_subdir":"post","layout":"dated","sync_dir":"","client":"mac","last_tx":"2026-11-25-10-27"}"#;
+        let p = parse_profiles(old);
+        assert_eq!(p.profiles.len(), 1);
+        assert_eq!(p.active, 0);
+        assert_eq!(p.active().title, DEFAULT_TITLE);
+        assert_eq!(p.active().content_subdir, "post");
+        assert_eq!(p.active().last_tx, "2026-11-25-10-27", "sync state kept");
+        assert!(p.active().git_blog_only);
+    }
+
+    #[test]
+    fn titles_are_short_and_unique() {
+        let long = "Ein sehr langer Titel für einen Blog, der nie endet";
+        assert!(clean_title(long).chars().count() <= TITLE_MAX);
+        let mut p = Profiles::default();
+        p.profiles[0].title = "Nachtgedanken".into();
+        p.profiles.push(Config { title: "Perlen".into(), ..Default::default() });
+        assert_eq!(p.unique_title("nachtgedanken", None), "nachtgedanken 2");
+        assert_eq!(p.unique_title("Perlen", Some(1)), "Perlen", "own title stays");
+        let json = serde_json::to_string(&p).unwrap();
+        let back = parse_profiles(&json);
+        assert_eq!(back.titles(), vec!["Nachtgedanken".to_string(), "Perlen".to_string()]);
     }
 }

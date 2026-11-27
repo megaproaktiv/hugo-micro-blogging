@@ -164,10 +164,36 @@ pub fn build(dir: &Path) -> Result<(), String> {
     };
     store::write_tx_file(&blog, "laptop", &[entry])?;
 
-    // settings of the app (HOME = dir while taking screenshots)
+    // the blog is a git repository with a remote; the last sync is committed, the laptop article not yet
+    let remote = dir.join("server/blog.git");
+    let git = |args: &[&str]| crate::gitops::run(&blog, args);
+    if crate::gitops::run(dir, &["init", "-q", "--bare", remote.to_str().unwrap_or("")]).is_ok() {
+        let _ = git(&["init", "-q", "-b", "main"]);
+        let _ = git(&["config", "user.name", "hmb Beispiel"]);
+        let _ = git(&["config", "user.email", "beispiel@example.org"]);
+        let _ = git(&["remote", "add", "origin", remote.to_str().unwrap_or("")]);
+        let _ = git(&["add", "-A", "--", "hugo.toml"]);
+        let _ = git(&["commit", "-q", "-m", "Hugo-Seite"]);
+        let _ = git(&["push", "-q", "-u", "origin", "main"]);
+        let _ = git(&["add", "-A", "--", "content/notizen", "content/technik", "tags.json"]);
+        let _ = git(&["commit", "-q", "-m", "Erste Artikel"]);
+    }
+
+    // settings of the app (HOME = dir while taking screenshots): two profiles
+    cfg.title = "Mein Blog".into();
+    let second = Config {
+        title: "Reisetagebuch".into(),
+        data_dir: dir.join("Documents/hmb-reisetagebuch"),
+        content_subdir: "content".into(),
+        layout: Layout::Dated,
+        client: "mac".into(),
+        ..Default::default()
+    };
+    let profiles = store::Profiles { active: 0, profiles: vec![cfg, second] };
     let cfg_path = dir.join("Library/Application Support/hmb/config.json");
     fs::create_dir_all(cfg_path.parent().unwrap()).map_err(|e| e.to_string())?;
-    fs::write(&cfg_path, serde_json::to_string_pretty(&cfg).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+    fs::write(&cfg_path, serde_json::to_string_pretty(&profiles).map_err(|e| e.to_string())?)
+        .map_err(|e| e.to_string())?;
     println!("Beispiel aufgebaut in {}", dir.display());
     Ok(())
 }

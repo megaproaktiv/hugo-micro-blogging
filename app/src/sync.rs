@@ -506,7 +506,21 @@ pub fn migrate_layout(cfg: &Config) -> Vec<String> {
     {
         sides.push((cfg.sync_dir.clone(), store::meta_of(&cfg.sync_dir), false));
     }
+    // folders between a content folder and its meta level (e.g. site/content for content/post)
+    // held these files in earlier versions too
+    let mut expanded: Vec<(PathBuf, PathBuf, bool)> = Vec::new();
     for (content, meta, is_local) in &sides {
+        expanded.push((content.clone(), meta.clone(), *is_local));
+        let mut cur = content.parent().map(|p| p.to_path_buf());
+        while let Some(d) = cur {
+            if canon(&d) == canon(meta) || !canon(&d).starts_with(canon(meta)) {
+                break;
+            }
+            expanded.push((d.clone(), meta.clone(), *is_local));
+            cur = d.parent().map(|p| p.to_path_buf());
+        }
+    }
+    for (content, meta, is_local) in &expanded {
         if !content.is_dir() || canon(content) == canon(meta) {
             continue;
         }
@@ -893,6 +907,43 @@ mod migrate_synthetic_tests {
         println!("{}", r.log.join("\n"));
         assert!(blog.join("b/y/index.md").exists());
         assert_eq!(fs::read_dir(t.join("site/transactions")).unwrap().count(), 2);
+        let _ = fs::remove_dir_all(&t);
+    }
+}
+
+
+#[cfg(test)]
+mod nested_content_tests {
+    use super::*;
+
+    #[test]
+    fn files_in_hugo_content_move_to_site_root_for_sub_folder_sync() {
+        let t = std::env::temp_dir().join(format!("hmb-nested-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&t);
+        let site = t.join("pearls");
+        let w = |p: PathBuf, s: &str| {
+            fs::create_dir_all(p.parent().unwrap()).unwrap();
+            fs::write(p, s).unwrap();
+        };
+        w(site.join("hugo.yaml"), "title: x");
+        w(site.join("content/post/a/index.md"), "---\ntitle: A\n---\n");
+        w(site.join("content/transactions/transaction-2026-11-25-10-27.json"), "{\"entries\":[]}");
+        w(site.join("transactions/transaction-2026-11-23-11-38.json"), "{\"entries\":[]}");
+        w(site.join("content/snippets.json"), "[]");
+        w(site.join("content/tags.json"), "{\"parents\":{}}");
+        let cfg = Config {
+            data_dir: t.join("app"),
+            content_subdir: "post".into(),
+            sync_dir: site.join("content/post"),
+            ..Default::default()
+        };
+        fs::create_dir_all(t.join("app/post")).unwrap();
+        println!("{:?}", migrate_layout(&cfg));
+        assert!(!site.join("content/transactions").exists());
+        assert!(!site.join("content/snippets.json").exists() && !site.join("content/tags.json").exists());
+        assert!(site.join("transactions/transaction-2026-11-25-10-27.json").exists());
+        assert!(site.join("transactions/transaction-2026-11-23-11-38.json").exists());
+        assert!(site.join("content/post/a/index.md").exists());
         let _ = fs::remove_dir_all(&t);
     }
 }

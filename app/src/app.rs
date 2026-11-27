@@ -2,6 +2,8 @@
 //! 10 entries per page (title + abstract, max. 3 lines) and the Markdown editor with preview.
 
 mod editor;
+mod git;
+mod profiles;
 mod images;
 mod panels;
 mod widgets;
@@ -82,9 +84,14 @@ pub enum PickKind {
     Images,
     DataDir,
     SyncDir,
+    GitRepo,
 }
 
 pub struct HmbApp {
+    /// all profiles (one per Hugo site); `cfg` is the open one
+    profiles: store::Profiles,
+    confirm_delete_profile: bool,
+    git: git::GitState,
     cfg: Config,
     data: PathBuf,
     /// screenshot with example data: never write settings
@@ -140,7 +147,13 @@ impl HmbApp {
         widgets::setup_style(&cc.egui_ctx);
         egui_extras::install_image_loaders(&cc.egui_ctx);
 
-        let mut cfg = store::load_config();
+        let mut profiles = store::load_profiles();
+        if let Ok(want) = std::env::var("HMB_PROFILE") {
+            if let Some(i) = profiles.profiles.iter().position(|c| c.title.eq_ignore_ascii_case(want.trim())) {
+                profiles.active = i;
+            }
+        }
+        let mut cfg = profiles.active().clone();
         let mut demo = false;
         let mut data = cfg.data_dir.clone();
         if screenshot.is_some() && store::load_articles(&cfg).is_empty() {
@@ -162,6 +175,9 @@ impl HmbApp {
         };
 
         let mut app = HmbApp {
+            profiles,
+            confirm_delete_profile: false,
+            git: git::GitState::default(),
             pending_pick: None,
             settings_draft: cfg.clone(),
             cfg,
@@ -233,6 +249,7 @@ impl HmbApp {
                 }
             }
             Some("main") => app.view = ViewMode::Preview,
+            Some("git") => app.open_git(),
             _ => {}
         }
         let msg = format!("{} Einträge geladen aus {}", app.articles.len(), widgets::show_path(&app.data));
@@ -470,7 +487,7 @@ impl HmbApp {
                 self.cfg.last_sync =
                     Some(chrono::Local::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, false));
                 if !self.demo {
-                    let _ = store::save_config(&self.cfg);
+                    let _ = self.persist();
                 }
                 self.set_status(format!("Synchronisiert. {}", r.log.join(" ")), true);
                 let mut news = r.imported;
@@ -488,6 +505,7 @@ impl HmbApp {
             || d.content_subdir != self.cfg.content_subdir
             || d.layout != self.cfg.layout;
         self.settings_draft.default_section = store::clean_section(&self.settings_draft.default_section);
+        self.settings_draft.title = self.profiles.unique_title(&self.settings_draft.title, Some(self.profiles.active));
         let c = store::slugify(&self.settings_draft.client, 24);
         self.settings_draft.client = if c.is_empty() { "client".into() } else { c };
         // sync bookkeeping always comes from the live settings
@@ -501,7 +519,7 @@ impl HmbApp {
             self.editor = None;
             self.reload();
         }
-        match store::save_config(&self.cfg) {
+        match self.persist() {
             Ok(()) => self.set_status("Einstellungen gespeichert.", true),
             Err(e) => self.set_status(format!("Einstellungen nicht gespeichert: {e}"), false),
         }
@@ -644,6 +662,7 @@ impl HmbApp {
 impl eframe::App for HmbApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.handle_tray(ctx);
+        self.poll_git();
         self.handle_drops(ctx);
         self.poll_pick(ctx);
         self.poll_sync();
@@ -656,6 +675,7 @@ impl eframe::App for HmbApp {
         self.list_panel(ctx);
         self.editor_panel(ctx);
         self.windows(ctx);
+        self.git_window(ctx);
         self.drop_overlay(ctx);
         self.autosave(ctx);
         self.screenshot_step(ctx);

@@ -27,12 +27,14 @@ impl HmbApp {
                     );
                     ui.label(RichText::new("hmb").size(19.0).strong().color(INK));
                     ui.label(RichText::new("Hugo Microblogger").small().color(MUTED));
-                    ui.add_space(24.0);
+                    ui.add_space(16.0);
+                    self.profile_selector(ui);
+                    ui.add_space(8.0);
 
                     let search = ui.add(
                         egui::TextEdit::singleline(&mut self.search)
                             .hint_text("🔍  Nach Tags suchen …  (z. B. rust web)")
-                            .desired_width(360.0)
+                            .desired_width(260.0)
                             .margin(Margin::symmetric(8, 5)),
                     );
                     if search.changed() {
@@ -54,6 +56,15 @@ impl HmbApp {
                             self.dupes = sync::nested_copies(&self.cfg);
                             self.confirm_cleanup = false;
                             self.show_settings = true;
+                        }
+                        let git_busy = self.git.busy();
+                        let git_label = if git_busy { "Git …" } else { "Git" };
+                        if ui
+                            .add(egui::Button::new(RichText::new(git_label).strong().color(INK)))
+                            .on_hover_text("Pull, Commit und Push für den Blog dieses Profils")
+                            .clicked()
+                        {
+                            self.open_git();
                         }
                         let syncing = self.sync_rx.is_some();
                         let label = if syncing { "Synchronisiere …" } else { "🔄  Synchronisieren" };
