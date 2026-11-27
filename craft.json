@@ -6,10 +6,10 @@
     "kind": "none"
   },
   "stack": "Rust + egui (eframe)",
-  "status": "building",
-  "note": "The builder checked its work: all 2 checks pass.",
+  "status": "ready",
+  "note": "Ready: all 2 checks pass.",
   "created_ms": 1795385278285,
-  "updated_ms": 1795793354855,
+  "updated_ms": 1795793380403,
   "checks": [
     {
       "round": 1,
@@ -270,6 +270,26 @@
         "checks/round-0/screenshot.png"
       ],
       "at_ms": 1795789273416
+    },
+    {
+      "round": 14,
+      "check": "build",
+      "passed": true,
+      "similarity": null,
+      "note": "Build succeeded.",
+      "artifacts": [],
+      "at_ms": 1795793352652
+    },
+    {
+      "round": 14,
+      "check": "app-screenshot",
+      "passed": true,
+      "similarity": null,
+      "note": "The program starts and draws (1320×820).",
+      "artifacts": [
+        "checks/round-0/screenshot.png"
+      ],
+      "at_ms": 1795793354840
     }
   ],
   "agent_session": "57b8a487-cacd-44a2-b649-02274356afe3",
@@ -277,7 +297,7 @@
   "agent_session_deep": false,
   "capture_deep": false,
   "allowed_actions": [],
-  "last_reply": "I'll build both epics:\n\n1. **Profiles:** each blog becomes its own profile with a title of up to 32 characters, its own folders and its own sync state. You switch between them with a dropdown on the main page.\n2. **Git:** a new \"Git\" button next to New, Snippets and Synchronize opens a window with Pull, Commit and Push. It shows what changed, proposes the commit message, and displays Git's output.\n\nLet me look at the current state first.The project now has its own instructions file and a changelog. Reading them first.Important rules from the project file: no blocking file dialogs inside the interface loop (use `start_pick` instead), and every change goes into the changelog. Let me look at the relevant code parts.Storage works. Now the app side: switching profiles, creating new ones, and the dropdown on the main page.That delete function got convoluted; simplifying it before I go on.Profiles are in place. Now the Git part: a small helper module that runs Git and reads which articles were created, changed or deleted since the last commit.Now the Git window itself.Now the top bar (profile dropdown and Git button) and the settings (profile title, Git repository, delete profile).Builds. Running the tests, including the new Git test with a local test server repository.That's my test being wrong, not the code: the shortened title drops a trailing space, so it ends up at 31 characters, which is correct. Adjusting the test.All 13 tests pass. I'm testing the move on a copy of your pearls blog, since it touches real files there.I built both epics, and the build and all 13 tests pass.\n\n**Profiles:** On the main page there's now a dropdown at the top left. Each profile is one Hugo site with a title of up to 32 characters, its own data folder, its own sync folder and its own Git repository. Switching loads that site's articles and syncs against that site's sync folder. Your existing settings became the first profile, named \"pearls\" after your Hugo site.\n\n**Git:** A new \"Git\" button sits next to Neu, Snippets and Synchronisieren. It opens a window with three steps:\n- **Pull** gets new changes from the server and then offers \"Jetzt synchronisieren\".\n- **Commit** lists what is new, changed or deleted since the last commit. The proposed message starts with the most recently changed entry and lists the three groups below it.\n- **Push** sends the commits; Git's output, including the push message, appears at the bottom of the window.\n\nI tested all three steps against a local test repository, not against your real server.\n\n**Something that changes your blog on the next start:** I found and fixed a bug. Because your sync folder is `pearls/content/post`, hmb had been writing transactions, snippets and tags into `pearls/content/`, inside Hugo's content. On the next start, hmb moves these three items to `pearls/`, next to `content`. I tested this on a copy and the articles stayed untouched. You'll then see these moves in Git.\n\n**Still open:**\n- The app still warns about a duplicate folder: there are copies in `post/post` in both your blog and your app folder. \"Doppelte Ordner reparieren\" in the settings cleans them up.\n- The guide with screenshots now lives outside the app folder, so I didn't change it. If you want, I can add pictures of the profiles and the Git window.",
+  "last_reply": "You've explicitly asked for this, so I'll follow the release steps in the project file: raise the version, write the changelog, build the DMG, commit, tag, push, and create the GitHub release. First the current state, including a change in the Git window that wasn't made by me.Version will be **0.2.0** (new features). Before committing, I'm checking that no keys or passwords are in the files to be committed.Nothing sensitive found. Now the version, changelog and release notes.Package built. A quick check that the app in the DMG starts and has version 0.2.0, then the regular build check before committing.Everything checks out. Now commit, tag v0.2.0, push, and create the GitHub release.The automatic mode in Craft Anything doesn't allow push and release without your explicit approval (\"publish\"). I'll only do the local steps, commit and tag; nothing leaves your computer.Version 0.2.0 is ready but not yet published: push and GitHub release are still missing, because Craft Anything's automatic mode doesn't allow publishing without your approval (\"publish\").\n\nWhat's done:\n- **Package:** the DMG `hmb-0.2.0-macos-arm64.dmg` is built, and I checked that the app inside shows version 0.2.0 and starts.\n- **Change log:** the 0.2.0 entry is in the changelog, and German release notes are written.\n- **Git:** everything is in a local commit with the tag `v0.2.0`.\n\nEither allow \"publish\" for this project in the approvals and ask me again, or run these two commands yourself in the project folder:\n\n```sh\ngit push origin main v0.2.0\ncd app && env -u GITHUB_TOKEN gh release create v0.2.0 dist/hmb-0.2.0-macos-arm64.dmg dist/hmb-0.2.0-macos-arm64.dmg.sha256 --title \"hmb 0.2.0\" --notes-file release/NOTES-0.2.0.md\n```",
   "asset_budget_usd": 5.0,
   "generate_assets": false,
   "questions": "decide",

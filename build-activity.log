@@ -758,3 +758,23 @@
 15:29:23 done  Running cd /Users/gernotglawe/letsbuild/2026/hugo-micro-blogging && git log --oneline -2; git tag | tail -2; git status --short | wc -l: f179ce3 Bugfixes b6abec8 Fix crash in file dialogs, robust DMG build, v0.1.1 v0.1.0 v0.1.1 27
 15:29:29 said  The automatic mode in Craft Anything doesn't allow push and release without your explicit approval ("publish"). I'll only do the local steps, commit and tag; nothing leaves your computer.
 15:29:29 start Running git add -A && git commit -q -F - <<'EOF'
+15:29:30 done  Running git add -A && git commit -q -F - <<'EOF': 1e2e439 hmb 0.2.0: Profile, Git-Fenster, Transaktionen neben content v0.2.0 0
+15:29:34 start core handoff write
+15:29:35 done  core handoff write: {"result":{"revision":18}}
+15:29:38 said  Version 0.2.0 is ready but not yet published: push and GitHub release are still missing, because Craft Anything's automatic mode doesn't allow publishing without your approval ("publish").
+15:29:38 said  What's done:
+15:29:38 said  - **Package:** the DMG `hmb-0.2.0-macos-arm64.dmg` is built, and I checked that the app inside shows version 0.2.0 and starts.
+15:29:38 said  - **Change log:** the 0.2.0 entry is in the changelog, and German release notes are written.
+15:29:38 said  - **Git:** everything is in a local commit with the tag `v0.2.0`.
+15:29:38 said  Either allow "publish" for this project in the approvals and ask me again, or run these two commands yourself in the project folder:
+15:29:38 said  ```sh
+15:29:38 said  git push origin main v0.2.0
+15:29:38 said  cd app && env -u GITHUB_TOKEN gh release create v0.2.0 dist/hmb-0.2.0-macos-arm64.dmg dist/hmb-0.2.0-macos-arm64.dmg.sha256 --title "hmb 0.2.0" --notes-file release/NOTES-0.2.0.md
+15:29:39 said  ```
+15:29:39 note  The builder's turn ended (4327820 tokens in, 5600 out)
+15:29:40 stage Checking the build…
+15:29:40 note  Nothing the check looks at has changed since it last worked, so its results stand.
+15:29:40 done  Check build: Build succeeded.
+15:29:40 done  Check app-screenshot: The program starts and draws (1320×820).
+15:29:40 stage Ready: all 2 checks pass.
+15:29:40 stage Ready: all 2 checks pass.
